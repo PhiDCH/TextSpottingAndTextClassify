@@ -151,7 +151,7 @@ if __name__ == "__main__":
     
     #save txt
     
-    
+    print(result)
     #save image
     
     

@@ -5,3 +5,4 @@ In your workspace directory
 %cd TextSpottingAndTextClassify
 
 !bash config.sh
+
