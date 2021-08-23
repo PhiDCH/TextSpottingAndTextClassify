@@ -6,3 +6,5 @@ In your workspace directory
 
 !bash config.sh
 
+!python productInfer.py
+
