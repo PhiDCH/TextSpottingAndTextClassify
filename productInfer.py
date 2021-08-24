@@ -82,6 +82,14 @@ def convert_boxPoint2Yolo(pts, imgShape):
         yolo.append(np.array([x,y,w/width, h/height]))
     return yolo
 
+def remove_small_text(pts):
+    new_pts = []
+    for poly in pts:
+        x,y,w,h = cv2.boundingRect(poly.astype(int))
+        if h > 10 and w > 10:
+            new_pts.append(poly)
+    return np.array(new_pts)
+
 def sort_pts(pts, max_pts):
     heights = []    # sort by height
     for poly in pts:
@@ -98,6 +106,8 @@ def textSpotting(detect1, detect2, recog, img, max_word=16):
     pts_pan[np.where(pts_pan < 0)] = 0
 
     pts = ensemble(pts_mmocr, pts_pan) 
+    # remove small text
+    pts = remove_small_text(pts.copy())
     # sort and take up to max_word poly
     pts = sort_pts(pts, max_word)
     yolo = convert_boxPoint2Yolo(pts, img.shape)
