@@ -64,8 +64,9 @@ def ensemble(pts1, pts2):
     
     if pts1.size == 0:
         pts = pts2
-        if pts2.size == 0:
-            pts = []
+    elif pts2.size == 0:
+        pts = pts1
+    elif pts1.size==0 and pts2.size==0: pts = []
     else:
         pts = np.vstack((pts1, pts2))   
     return pts
