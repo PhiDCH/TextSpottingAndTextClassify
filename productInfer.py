@@ -101,7 +101,7 @@ def sort_pts(pts, max_pts):
 
 def textSpotting(detect1, detect2, recog, img, max_word=16):
     mmocr_det_res = detect2.readtext(img=[img.copy()])
-    pts_mmocr = np.array([np.array(pts[:8]).reshape((-1,2)) for pts in mmocr_det_res[0][0]['boundary_result']])
+    pts_mmocr = np.array([np.array(pts[:8]).reshape((-1,2)) for pts in mmocr_det_res[0]['boundary_result']])
     pts_mmocr[np.where(pts_mmocr < 0)] = 0
     
     preds, pts_pan, t = detect1.predict(img=img.copy())
@@ -116,12 +116,12 @@ def textSpotting(detect1, detect2, recog, img, max_word=16):
     
     crop_imgs = crop_text(pts, img)
     
-    result_recog = []
-    for crop in crop_imgs:
-        res = recog.readtext(img=[crop])
-        result_recog.append(res[0])
+    # result_recog = []
+    # for crop in crop_imgs:
+    #     res = recog.readtext(img=[crop])
+    #     result_recog.append(res[0])
     
-    # result_recog = recog.readtext(img=crop_imgs.copy(), batch_mode=True, single_batch_size=max_word)
+    result_recog = recog.readtext(img=crop_imgs.copy(), batch_mode=True, single_batch_size=max_word)
     
     temp = {'boxPoint': None, 'boxYolo': None, 'text': None, 'text_score': None}
     result = []
@@ -129,8 +129,8 @@ def textSpotting(detect1, detect2, recog, img, max_word=16):
         temp1 = temp.copy()
         temp1['boxPoint'] = poly
         temp1['boxYolo'] = yolo[count]
-        temp1['text'] = result_recog[count][0]['text']
-        temp1['text_score'] = result_recog[count][0]['score']
+        temp1['text'] = result_recog[count]['text']
+        temp1['text_score'] = result_recog[count]['score']
         result.append(temp1)
         
     return result
