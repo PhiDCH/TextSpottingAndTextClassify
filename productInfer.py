@@ -9,13 +9,6 @@ from pan.predict import Pytorch_model
 from textClassify.product_classifier_infer import ClassifierInfer
 
 
-def crop_text(polys, img):
-    crop_imgs = []
-    for poly in polys:
-        x,y,w,h = cv2.boundingRect(poly.astype(int))
-        crop_imgs.append(img[y:y+h, x:x+w, :].copy())
-    return crop_imgs
-
 def bb_intersection_over_union(boxA, boxB):
     # determine the (x, y)-coordinates of the intersection rectangle
     xA = max(boxA[0], boxB[0])
@@ -148,8 +141,9 @@ def textClassify(model1, model2, model3, pre_result):
 
 
 if __name__ == "__main__":
+    ################## TextSpoting for product's image###############
     # Load models into memory
-    mmocr_detect = MMOCR(det='DB_r50', recog=None)
+    mmocr_detect = MMOCR(det='MaskRCNN_IC17', recog=None)
     mmocr_recog = MMOCR(det=None, recog='SAR')
 
     model_path = 'pan/pretrain/pannet_wordlevel.pth'
@@ -171,4 +165,13 @@ if __name__ == "__main__":
     print(result)
     #save image
     
+    ################## TextSpoting for banner's image###############
+    os.chdir('CRAFT-pytorch')
+    from inference import load_model, extract_wordbox
+    os.chdir('..')
+
+    word_model = load_model('CRAFT-pytorch/craft_mlt_25k.pth')
     
+    boxes = extract_wordbox(word_model, img)
+    
+    print(boxes)

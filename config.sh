@@ -20,11 +20,16 @@ pip install pyclipper
 pip install colorlog
 python -m pip install Pillow==6.2
 cd ../..
-gdown --id 1WCoawJV2jSTJz_unaQRA31sBbB8Ptah3 -O pan/pretrain/pannet_wordlevel.pth
+gdown --id 1FpVf64mfAyaHQ70AV2rUfY3SydLwFq0W -O pan/pretrain/pannet_wordlevel.pth
 
 gdown https://drive.google.com/uc?id=1zWsVDHC-7FlRNTOxHO5fIj2t2kYHu-nA
 mkdir textClassify
 unzip data.zip -d textClassify/
 rm data.zip
+
+git clone https://github.com/PhiDCH/CRAFT-pytorch
+cd CRAFT-pytorch 
+gdown --id 1RyaO4cxaV62L78AEAvrrPeaX9_JLLqXB -O craft_mlt_25k.pth
+cd ..
 
 
