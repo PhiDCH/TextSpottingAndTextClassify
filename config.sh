@@ -27,9 +27,13 @@ mkdir textClassify
 unzip data.zip -d textClassify/
 rm data.zip
 
+
 git clone https://github.com/PhiDCH/CRAFT-pytorch
 cd CRAFT-pytorch 
 gdown --id 1RyaO4cxaV62L78AEAvrrPeaX9_JLLqXB -O craft_mlt_25k.pth
 cd ..
 
-
+git clone https://github.com/PhiDCH/text-recognition
+cd text-recognition/
+gdown --id 1U4KQQ36LCS4HBr3hKXQC-D7exRb2aLci -O best_accuracy.pth
+cd ..
