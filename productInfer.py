@@ -1,12 +1,16 @@
 import cv2 
 import numpy as np
 import os 
+from PIL import Image
+
 os.chdir('mmocr')
 from mmocr.utils.ocr import MMOCR
 os.chdir('..')
 from pan.predict import Pytorch_model
 
 from textClassify.product_classifier_infer import ClassifierInfer
+
+
 
 
 def bb_intersection_over_union(boxA, boxB):
@@ -138,7 +142,48 @@ def textClassify(model1, model2, model3, pre_result):
     pre_result.append((level1, level2, level3, has_age))
     return pre_result
     
+def crop_with_padding(img, pts):
+    pts_ = pts.reshape(-1, 2).astype(int)
 
+    rect = cv2.boundingRect(pts_)
+    x,y,w,h = rect
+    croped = img[y:y+h, x:x+w].copy()
+
+    ## (2) make mask
+    pts_ = pts_ - pts_.min(axis=0)
+
+    mask = np.zeros(croped.shape[:2], np.uint8)
+    cv2.drawContours(mask, [pts_], -1, (255, 255, 255), -1, cv2.LINE_AA)
+
+    ## (3) do bit-op
+    dst = cv2.bitwise_and(croped, croped, mask=mask)
+
+    ## (4) add the white background
+    bg = np.ones_like(croped, np.uint8)*255
+    cv2.bitwise_not(bg,bg, mask=mask)
+    dst2 = bg+ dst
+
+    return dst2
+
+def text_recog(img, boxes, recog_model):
+    temp = {'boxes': None,'pil_img': None, 'text': None}
+    result = []
+
+    for poly in boxes:
+        x,y,w,h = cv2.boundingRect(poly)
+        if h > 10 and w > 10:
+            save_dict = temp.copy()
+            save_dict['boxes'] = poly
+            save_dict['pil_img'] = Image.fromarray(cv2.cvtColor(crop_with_padding(img, poly), cv2.COLOR_BGR2RGB))
+            result.append(save_dict)
+
+    all_crop_img = [item['pil_img'] for item in result]
+    result_text_recog = recog_model.infer(images=all_crop_img)
+
+    for count, item in enumerate(result_text_recog):
+        result[count]['text'] = item[0]
+
+    return result
 
 if __name__ == "__main__":
     ################## TextSpoting for product's image###############
@@ -169,9 +214,23 @@ if __name__ == "__main__":
     os.chdir('CRAFT-pytorch')
     from inference import load_model, extract_wordbox
     os.chdir('..')
+    
+    os.chdir('text-recognition')
+    from inferer import TextRecogInferer, default_args
+    os.chdir('..')
 
-    word_model = load_model('CRAFT-pytorch/craft_mlt_25k.pth')
+    # load model recog
+    model_path = 'text-recognition/best_accuracy.pth'
+    opt = default_args(model_path)
+    inferer = TextRecogInferer(opt)
     
-    boxes = extract_wordbox(word_model, img)
+    #load model detect
+    detect_model = load_model('CRAFT-pytorch/craft_mlt_25k.pth')
     
-    print(boxes)
+    # detect text
+    # cho nay o truyen vao img va boxes
+    img = cv2.polylines(img, np.array(boxes).astype(int), True, (255,255,255), -1)
+    
+    word_boxs = extract_wordbox(detect_model, img)
+    # recog
+    result = text_recog(img, word_boxs, inferer)
