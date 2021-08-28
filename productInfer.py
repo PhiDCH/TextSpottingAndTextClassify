@@ -123,11 +123,6 @@ def textSpotting(detect1, detect2, recog, img, max_word=16):
     
     crop_imgs = [crop_with_padding(img, poly) for poly in pts]
     
-    # result_recog = []
-    # for crop in crop_imgs:
-    #     res = recog.readtext(img=[crop])
-    #     result_recog.append(res[0])
-    
     result_recog = recog.readtext(img=crop_imgs.copy(), batch_mode=True, single_batch_size=max_word)
     
     temp = {'boxPoint': None, 'boxYolo': None, 'text': None, 'text_score': None}
@@ -211,7 +206,7 @@ if __name__ == "__main__":
     
     # detect text
     # cho nay o truyen vao img va boxes
-    img = cv2.polylines(img, np.array(boxes).astype(int), True, (255,255,255), -1)
+    # img = cv2.polylines(img, np.array(boxes).astype(int), True, (255,255,255), -1)
     
     word_boxs = extract_wordbox(detect_model, img)
     # recog
