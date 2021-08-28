@@ -10,7 +10,13 @@ from pan.predict import Pytorch_model
 
 from textClassify.product_classifier_infer import ClassifierInfer
 
-
+os.chdir('CRAFT-pytorch')
+from inference import load_model, extract_wordbox
+os.chdir('..')
+    
+os.chdir('text-recognition')
+from inferer import TextRecogInferer, default_args, text_recog
+os.chdir('..')
 
 
 def bb_intersection_over_union(boxA, boxB):
@@ -97,14 +103,18 @@ def sort_pts(pts, max_pts):
     return new_poly[:max_pts]
 
 def textSpotting(detect1, detect2, recog, img, max_word=16):
-    mmocr_det_res = detect2.readtext(img=[img.copy()])
-    pts_mmocr = np.array([np.array(pts[:8]).reshape((-1,2)) for pts in mmocr_det_res[0]['boundary_result']])
-    pts_mmocr[np.where(pts_mmocr < 0)] = 0
+    # mmocr_det_res = detect2.readtext(img=[img.copy()])
+    # pts_mmocr = np.array([np.array(pts[:8]).reshape((-1,2)) for pts in mmocr_det_res[0]['boundary_result']])
+    # pts_mmocr[np.where(pts_mmocr < 0)] = 0
+
+    word_boxes = extract_wordbox(detect2, img)
+
+
     
     preds, pts_pan, t = detect1.predict(img=img.copy())
     pts_pan[np.where(pts_pan < 0)] = 0
 
-    pts = ensemble(pts_mmocr, pts_pan) 
+    pts = ensemble(word_boxes, pts_pan) 
     # remove small text
     pts = remove_small_text(pts.copy())
     # sort and take up to max_word poly
@@ -165,30 +175,12 @@ def crop_with_padding(img, pts):
 
     return dst2
 
-def text_recog(img, boxes, recog_model):
-    temp = {'boxes': None,'pil_img': None, 'text': None}
-    result = []
-
-    for poly in boxes:
-        x,y,w,h = cv2.boundingRect(poly)
-        if h > 10 and w > 10:
-            save_dict = temp.copy()
-            save_dict['boxes'] = poly
-            save_dict['pil_img'] = Image.fromarray(cv2.cvtColor(crop_with_padding(img, poly), cv2.COLOR_BGR2RGB))
-            result.append(save_dict)
-
-    all_crop_img = [item['pil_img'] for item in result]
-    result_text_recog = recog_model.infer(images=all_crop_img)
-
-    for count, item in enumerate(result_text_recog):
-        result[count]['text'] = item[0]
-
-    return result
 
 if __name__ == "__main__":
     ################## TextSpoting for product's image###############
     # Load models into memory
-    mmocr_detect = MMOCR(det='MaskRCNN_IC17', recog=None)
+    # mmocr_detect = MMOCR(det='MaskRCNN_IC17', recog=None)
+    detect_model = load_model('CRAFT-pytorch/craft_mlt_25k.pth')
     mmocr_recog = MMOCR(det=None, recog='SAR')
 
     model_path = 'pan/pretrain/pannet_wordlevel.pth'
@@ -201,7 +193,7 @@ if __name__ == "__main__":
     # inference
     img = cv2.imread('TextSpottingAndTextClassify/img_1.jpg')
     
-    result = textSpotting(pan_detect, mmocr_detect, mmocr_recog, img)
+    result = textSpotting(pan_detect, detect_model, mmocr_recog, img)
 
     result = textClassify(classifyModel_level1, classifyModel_level2, classifyModel_level3, result)
     
@@ -211,21 +203,11 @@ if __name__ == "__main__":
     #save image
     
     ################## TextSpoting for banner's image###############
-    os.chdir('CRAFT-pytorch')
-    from inference import load_model, extract_wordbox
-    os.chdir('..')
-    
-    os.chdir('text-recognition')
-    from inferer import TextRecogInferer, default_args
-    os.chdir('..')
 
     # load model recog
     model_path = 'text-recognition/best_accuracy.pth'
     opt = default_args(model_path)
     inferer = TextRecogInferer(opt)
-    
-    #load model detect
-    detect_model = load_model('CRAFT-pytorch/craft_mlt_25k.pth')
     
     # detect text
     # cho nay o truyen vao img va boxes
