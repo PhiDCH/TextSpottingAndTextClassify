@@ -143,7 +143,7 @@ def textClassify(model1, model2, model3, pre_result):
     return pre_result
     
 def crop_with_padding(img, pts):
-    pts_ = pts.reshape(-1, 2).astype(int)
+    pts_ = pts.reshape((-1, 2)).astype(int)
 
     rect = cv2.boundingRect(pts_)
     x,y,w,h = rect
