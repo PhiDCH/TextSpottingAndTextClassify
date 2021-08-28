@@ -111,7 +111,7 @@ def textSpotting(detect1, detect2, recog, img, max_word=16):
     pts = sort_pts(pts, max_word)
     yolo = convert_boxPoint2Yolo(pts, img.shape)
     
-    crop_imgs = crop_text(pts, img)
+    crop_imgs = [crop_with_padding(poly, img) for poly in pts]
     
     # result_recog = []
     # for crop in crop_imgs:
