@@ -20,7 +20,7 @@ pip install pyclipper
 pip install colorlog
 python -m pip install Pillow==6.2
 cd ../..
-gdown --id 1FpVf64mfAyaHQ70AV2rUfY3SydLwFq0W -O pan/pretrain/pannet_wordlevel.pth
+gdown --id 1sDGcVF87BXbej7Hvas0a-B-x_MaiLqG0 -O pan/pretrain/pannet_wordlevel.pth
 
 gdown https://drive.google.com/uc?id=1zWsVDHC-7FlRNTOxHO5fIj2t2kYHu-nA
 mkdir textClassify

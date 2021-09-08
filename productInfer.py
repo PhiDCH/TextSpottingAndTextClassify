@@ -65,11 +65,11 @@ def ensemble(pts1, pts2):
             rm.append(count)
     pts1 = np.delete(pts1, rm, axis=0)
     
-    if pts1.size == 0:
+    if len(pts1) == 0:
         pts = pts2
-    elif pts2.size == 0:
+    elif len(pts2) == 0:
         pts = pts1
-    elif pts1.size==0 and pts2.size==0: pts = []
+    elif len(pts1)==0 and len(pts2)==0: pts = []
     else:
         pts = np.vstack((pts1, pts2))   
     return pts
@@ -170,6 +170,55 @@ def crop_with_padding(img, pts):
 
     return dst2
 
+def word2line(result, img):
+    temp = {'center': None, 'text': None}
+    new_res = []
+    zero_mask = np.zeros(img.shape[:2]).astype('uint8')
+    zero_mask_copy = zero_mask.copy()
+    for res in result:
+        x,y,w,h = cv2.boundingRect(res['boxes'].astype(int))
+        zero_mask[y+int(0.2*h):y+int(0.8*h), x:x+w] = 125
+        # zero_mask = cv2.polylines(zero_mask, [res['boxes'].astype(int)], True, 255, -1)
+
+        center = np.array([x+0.5*w, y+0.5*h]).astype(int)
+        # print(cv2.pointPolygonTest(res['boxes'].astype(int),tuple(center),False))
+        item = temp.copy()
+        item['center'] = center
+        item['text'] = res['text']
+        new_res.append(item)
+
+    kernel = np.ones((1, 20), np.uint8)    
+    zero_mask = cv2.dilate(zero_mask, kernel, iterations=1)
+
+    contours, hierarchy = cv2.findContours(zero_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+    # zero_mask_copy = cv2.drawContours(zero_mask_copy, contours, -1, 255, 2)
+    # cv2.imrite('mask.jpg', zero_mask_copy)
+
+    temp = {'contour': None, 'text': None, 'box': None}
+    final_res = []  
+    for contour in contours:
+        box = cv2.boundingRect(contour.astype(int))
+        item = temp.copy()
+        item['box'] = np.array(box)
+        item['contour'] = contour
+
+        text_with_center = []
+        temp1 = {'center': None, 'text': None}
+        for pt in new_res:
+            if cv2.pointPolygonTest(contour,tuple(pt['center']),False) > 0:
+                item1 = temp1.copy()
+                item1['text'] = pt['text']
+                item1['center'] = pt['center']
+                text_with_center.append(item1)
+        
+        text_with_center = np.array(text_with_center)
+        only_center = [it['center'][0] for it in text_with_center]
+        text_with_center = text_with_center[np.argsort(only_center)]
+        
+        item['text'] = ' '.join([text['text'] for text in text_with_center])
+        final_res.append(item)
+
+    return final_res
 
 if __name__ == "__main__":
     ################## TextSpoting for product's image###############
