@@ -47,23 +47,25 @@ def bb_intersection_over_union(boxA, boxB):
 def get_box_from_poly(pts):
     pts = pts.reshape((-1,2)).astype(int)
     x,y,w,h = cv2.boundingRect(pts)
-    return np.array([x,y,x+w,y+h])
+    area = w*h
+    return np.array([x,y,x+w,y+h]), area
 
 def ensemble(pts1, pts2):
     # take pts2 first then pts1
     iou_thres = 0.5
     pts = []
-    box2 = []
-    for poly in pts2:
-        box2.append(get_box_from_poly(poly))
     
-    rm = []
-    for count, poly in enumerate(pts1):
-        box = get_box_from_poly(poly)
-        iou_score = np.array([bb_intersection_over_union(box, box2i) for box2i in box2])
-        if np.any(iou_score) > iou_thres:
-            rm.append(count)
-    pts1 = np.delete(pts1, rm, axis=0)
+    # box2 = []
+    # for poly in pts2:
+    #     box2.append(get_box_from_poly(poly))
+    
+    # rm = []
+    # for count, poly in enumerate(pts1):
+    #     box = get_box_from_poly(poly)
+    #     iou_score = np.array([bb_intersection_over_union(box, box2i) for box2i in box2])
+    #     if np.any(iou_score) > iou_thres:
+    #         rm.append(count)
+    # pts1 = np.delete(pts1, rm, axis=0)
     
     if len(pts1) == 0:
         pts = pts2
@@ -72,6 +74,19 @@ def ensemble(pts1, pts2):
     elif len(pts1)==0 and len(pts2)==0: pts = []
     else:
         pts = np.vstack((pts1, pts2))   
+    
+    rm = []
+    for i in range(len(pts)):
+        for count, poly in enumerate(pts[i+1:]):
+            j = count +i+1
+            boxi, areai = get_box_from_poly(pts[i])
+            boxj, areaj = get_box_from_poly(poly)
+            iou_score = bb_intersection_over_union(boxi, boxj)
+            if iou_score > iou_thres:
+                if areai > areaj: rm.append(j)
+                else: rm.append(i)
+                
+    pts = np.delete(pts, rm, axis=0)
     return pts
 
 
@@ -102,6 +117,20 @@ def sort_pts(pts, max_pts):
     new_poly = pts[np.argsort(heights)][::-1]
     return new_poly[:max_pts]
 
+def expand_number2(boxes):
+    new_boxes = []
+    for box in boxes:
+        rrect = cv2.minAreaRect(box.astype('float32'))
+        temp = (rrect[1][0], rrect[1][1])
+        if temp[0]>temp[1]: temp = (temp[0]*1.2, temp[1])
+        else: temp = (temp[0], temp[1]*1.2)
+        new_rrect = (rrect[0], temp, rrect[2])
+        new_box = cv2.boxPoints(new_rrect)
+        new_box[np.where(new_box<0)] = 0
+        new_boxes.append(new_box)
+        
+    return new_boxes
+
 def textSpotting(detect1, detect2, recog, img, max_word=16):
     # mmocr_det_res = detect2.readtext(img=[img.copy()])
     # pts_mmocr = np.array([np.array(pts[:8]).reshape((-1,2)) for pts in mmocr_det_res[0]['boundary_result']])
@@ -113,6 +142,7 @@ def textSpotting(detect1, detect2, recog, img, max_word=16):
     
     preds, pts_pan, t = detect1.predict(img=img.copy())
     pts_pan[np.where(pts_pan < 0)] = 0
+    # pts_pan = expand_box(pts_pan)
 
     pts = ensemble(word_boxes, pts_pan) 
     # remove small text
@@ -135,6 +165,17 @@ def textSpotting(detect1, detect2, recog, img, max_word=16):
         temp1['text_score'] = result_recog[count]['score']
         result.append(temp1)
         
+    ######### refine text value of number 3, expand box for case of 2 with 20%
+    for count, res in enumerate(result):
+        if res['text'] == '2':
+            new_pts = [res['boxPoint']]
+            new_pts = expand_number2(new_pts)
+            result[count]['boxPoint'] = new_pts[0]
+
+            new_img = [crop_with_padding(img, poly) for poly in new_pts]
+            new_res = recog.readtext(img=new_img.copy(), batch_mode=False)
+            result[count]['text'] = new_res[0]['text']
+
     return result
 
 def textClassify(model1, model2, model3, pre_result):
