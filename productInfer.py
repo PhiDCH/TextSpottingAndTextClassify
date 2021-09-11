@@ -116,7 +116,7 @@ def textSpotting(detect1, detect2, recog, img, max_word=16):
 
     pts = ensemble(word_boxes, pts_pan) 
     # remove small text
-    pts = remove_small_text(pts.copy())
+    # pts = remove_small_text(pts.copy())
     # sort and take up to max_word poly
     pts = sort_pts(pts, max_word)
     yolo = convert_boxPoint2Yolo(pts, img.shape)
