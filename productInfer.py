@@ -3,20 +3,15 @@ import numpy as np
 import os 
 from PIL import Image
 
-os.chdir('mmocr')
-from mmocr.utils.ocr import MMOCR
-os.chdir('..')
+from mmocr1.getmodel import MMOCR
+
 from pan.predict import Pytorch_model
 
 from textClassify.product_classifier_infer import ClassifierInfer
 
-
 from CRAFTpytorch.inference import load_model, extract_wordbox
 
-    
-os.chdir('text-recognition')
-from inferer import TextRecogInferer, default_args, text_recog
-os.chdir('..')
+from textRecognition.inferer import TextRecogInferer, default_args, text_recog
 
 
 def bb_intersection_over_union(boxA, boxB):
@@ -264,9 +259,8 @@ def word2line(result, img):
 if __name__ == "__main__":
     ################## TextSpoting for product's image###############
     # Load models into memory
-    # mmocr_detect = MMOCR(det='MaskRCNN_IC17', recog=None)
-    detect_model = load_model('CRAFT-pytorch/craft_mlt_25k.pth')
-    mmocr_recog = MMOCR(det=None, recog='SAR')
+    detect_model = load_model('CRAFTpytorch/craft_mlt_25k.pth')
+    mmocr_recog = MMOCR(det=None, recog='SAR', config_dir='mmocr1/configs/')
 
     model_path = 'pan/pretrain/pannet_wordlevel.pth'
     pan_detect = Pytorch_model(model_path, gpu_id=0)
@@ -290,7 +284,7 @@ if __name__ == "__main__":
     ################## TextSpoting for banner's image###############
 
     # load model recog
-    model_path = 'text-recognition/best_accuracy.pth'
+    model_path = 'textRecognition/best_accuracy.pth'
     opt = default_args(model_path)
     inferer = TextRecogInferer(opt)
     

@@ -19,7 +19,10 @@ pip install polygon3
 pip install pyclipper
 pip install colorlog
 python -m pip install Pillow==6.2
-cd ../..
+cd ..
+!rm -rf base config data_loader imgs result test_img trainer utils
+!rm PAN.ipynb README.MD train.py eval.py config.json
+cd ..
 gdown --id 1sDGcVF87BXbej7Hvas0a-B-x_MaiLqG0 -O pan/pretrain/pannet_wordlevel.pth
 
 gdown https://drive.google.com/uc?id=1zWsVDHC-7FlRNTOxHO5fIj2t2kYHu-nA
@@ -29,11 +32,11 @@ rm data.zip
 
 
 git clone https://github.com/PhiDCH/CRAFT-pytorch CRAFTpytorch
-cd CRAFT-pytorch 
-gdown --id 1V7X_ZS4ZhuZhCxbhhKO8B_1PGWQyKfdI -O craft_mlt_25k.pth
+cd CRAFTpytorch 
+gdown --id 1RyaO4cxaV62L78AEAvrrPeaX9_JLLqXB -O craft_mlt_25k.pth
 cd ..
 
-git clone https://github.com/PhiDCH/text-recognition
-cd text-recognition/
+git clone https://github.com/PhiDCH/text-recognition textRecognition
+cd textRecognition/
 gdown --id 1U4KQQ36LCS4HBr3hKXQC-D7exRb2aLci -O best_accuracy.pth
 cd ..
