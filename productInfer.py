@@ -10,9 +10,9 @@ from pan.predict import Pytorch_model
 
 from textClassify.product_classifier_infer import ClassifierInfer
 
-os.chdir('CRAFT-pytorch')
-from inference import load_model, extract_wordbox
-os.chdir('..')
+
+from CRAFTpytorch.inference import load_model, extract_wordbox
+
     
 os.chdir('text-recognition')
 from inferer import TextRecogInferer, default_args, text_recog
