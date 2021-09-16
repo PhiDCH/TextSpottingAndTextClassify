@@ -22,8 +22,8 @@ pip install pyclipper
 pip install colorlog
 python -m pip install Pillow==6.2
 cd ..
-!rm -rf base config data_loader imgs result test_img trainer utils
-!rm PAN.ipynb README.MD train.py eval.py config.json
+rm -rf base config data_loader imgs result test_img trainer utils
+rm PAN.ipynb README.MD train.py eval.py config.json
 cd ..
 gdown --id 1sDGcVF87BXbej7Hvas0a-B-x_MaiLqG0 -O pan/pretrain/pannet_wordlevel.pth
 
