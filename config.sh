@@ -9,6 +9,8 @@ cd mmocr1
 pip install -r requirements.txt
 pip install -v -e .  # or "python setup.py develop"
 export PYTHONPATH=$(pwd):$PYTHONPATH
+rm -rf demo docker docs docs_zh_CN mmocr.egg-info resources tests tools 
+rm MANIFEST.in README.md README_zh-CN.md model-index.yml setup.cfg setup.py
 cd ..
 
 git clone https://github.com/PhiDCH/PAN.pytorch pan
