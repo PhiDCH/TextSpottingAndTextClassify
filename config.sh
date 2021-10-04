@@ -25,7 +25,7 @@ cd ..
 rm -rf base config data_loader imgs result test_img trainer utils
 rm PAN.ipynb README.MD train.py eval.py config.json
 cd ..
-gdown --id 1sDGcVF87BXbej7Hvas0a-B-x_MaiLqG0 -O pan/pretrain/pannet_wordlevel.pth
+gdown --id 1V7X_ZS4ZhuZhCxbhhKO8B_1PGWQyKfdI -O pan/pretrain/pannet_wordlevel.pth
 
 gdown https://drive.google.com/uc?id=1zWsVDHC-7FlRNTOxHO5fIj2t2kYHu-nA
 mkdir textClassify

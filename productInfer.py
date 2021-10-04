@@ -271,8 +271,12 @@ if __name__ == "__main__":
     
     # inference
     img = cv2.imread('TextSpottingAndTextClassify/img_1.jpg')
+    img = cv2.imread('test_11_1.jpg')
     
     result = textSpotting(pan_detect, detect_model, mmocr_recog, img)
+
+    img_save = cv2.polylines(img, [res['boxPoint'].astype(int) for res in result], True, (0,255,0), 1)
+    cv2.imwrite('test.jpg', img_save)
 
     result = textClassify(classifyModel_level1, classifyModel_level2, classifyModel_level3, result)
     
