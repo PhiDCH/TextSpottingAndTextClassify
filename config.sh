@@ -3,7 +3,7 @@ cd ..
 
 pip install torch==1.7.1+cu101 torchvision==0.8.2+cu101 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html
 pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu101/torch1.7.0/index.html
-pip install mmdet
+pip install mmdet==2.16.0
 git clone https://github.com/PhiDCH/mmocr mmocr1
 cd mmocr1
 pip install -r requirements.txt
