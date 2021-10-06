@@ -169,6 +169,8 @@ def textSpotting(detect1, detect2, recog, img, max_word=16):
 
             new_img = [crop_with_padding(img, poly) for poly in new_pts]
             new_res = recog.readtext(img=new_img.copy(), batch_mode=False)
+            if new_res[0]['text'] != '3':
+                continue
             result[count]['text'] = new_res[0]['text']
 
     return result
