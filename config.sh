@@ -27,6 +27,11 @@ rm PAN.ipynb README.MD train.py eval.py config.json
 cd ..
 gdown --id 1V7X_ZS4ZhuZhCxbhhKO8B_1PGWQyKfdI -O pan/pretrain/pannet_wordlevel.pth
 
+git clone https://github.com/PhiDCH/new_pan newpan
+cd newpan
+bash compile.sh
+cd ..
+
 gdown https://drive.google.com/uc?id=1zWsVDHC-7FlRNTOxHO5fIj2t2kYHu-nA
 mkdir textClassify
 unzip data.zip -d textClassify/
