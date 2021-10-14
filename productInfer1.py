@@ -48,7 +48,7 @@ def get_box_from_poly(pts):
 
 def ensemble(pts1, pts2):
     # take pts2 first then pts1
-    iou_thres = 0.5
+    iou_thres = 0.3
     pts = []
     
     # box2 = []
