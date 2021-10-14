@@ -150,7 +150,9 @@ def textSpotting(config_file,detect1, detect2, recog, img, max_word=16):
     yolo = convert_boxPoint2Yolo(pts, img.shape)
     
     crop_imgs = [crop_with_padding(img, poly) for poly in pts]
-    
+    for idx,crop in enumerate(crop_imgs):
+        if crop is None:
+            crop_imgs.pop(idx)
     result_recog = recog.readtext(img=crop_imgs.copy(), batch_mode=True, single_batch_size=max_word)
     
     temp = {'boxPoint': None, 'boxYolo': None, 'text': None, 'text_score': None}
@@ -193,23 +195,26 @@ def crop_with_padding(img, pts):
 
     rect = cv2.boundingRect(pts_)
     x,y,w,h = rect
-    croped = img[y:y+h, x:x+w].copy()
+    if w < 4 or h < 4:
+        return None
+    else:
+        croped = img[y:y+h, x:x+w].copy()
 
-    ## (2) make mask
-    pts_ = pts_ - pts_.min(axis=0)
+        ## (2) make mask
+        pts_ = pts_ - pts_.min(axis=0)
 
-    mask = np.zeros(croped.shape[:2], np.uint8)
-    cv2.drawContours(mask, [pts_], -1, (255, 255, 255), -1, cv2.LINE_AA)
+        mask = np.zeros(croped.shape[:2], np.uint8)
+        cv2.drawContours(mask, [pts_], -1, (255, 255, 255), -1, cv2.LINE_AA)
 
-    ## (3) do bit-op
-    dst = cv2.bitwise_and(croped, croped, mask=mask)
+        ## (3) do bit-op
+        dst = cv2.bitwise_and(croped, croped, mask=mask)
 
-    ## (4) add the white background
-    bg = np.ones_like(croped, np.uint8)*255
-    cv2.bitwise_not(bg,bg, mask=mask)
-    dst2 = bg+ dst
+        ## (4) add the white background
+        bg = np.ones_like(croped, np.uint8)*255
+        cv2.bitwise_not(bg,bg, mask=mask)
+        dst2 = bg+ dst
 
-    return dst2
+        return dst2
 
 def word2line(result, img):
     temp = {'center': None, 'text': None}
