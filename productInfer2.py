@@ -147,7 +147,7 @@ def textSpotting(config_file,detect1, detect2, recog, img, max_word=16):
         temp1['boxPoint'] = poly
         temp1['boxYolo'] = yolo[count]
         temp1['text'] = result_recog[count][0]
-        # temp1['text_score'] = result_recog[count]['score']
+        temp1['text_score'] = 1
         result.append(temp1)
         
     return result
